@@ -3,14 +3,23 @@
  */
 
 // import the libraries needed
-#include <PCJoy.h>
+#include <WiiChuck.h>
+#include <Wire.h>
 
 const int leftLed = 4;    // pin the left LED is attached to
 const int rightLed = 5;    // pin the right LED is attached to
 #define AUDIOPIN 3
-PCJoy myJoy(A0, A1, 6, 7);
+Nunchuck nunchuck(SDA, SCL);
 
 void setup() {
+  //setup Nunchuck
+  nunchuck.begin();
+
+  nunchuck.addMap(new Nunchuck::joyX(5,200,128,10)); // Servo pin, max servo value, zero center value, min servo value 
+  nunchuck.addMap(new Nunchuck::joyY(6,200,128,10)); // Servo pin, max servo value, zero center value, min servo value                                                          
+  nunchuck.addMap(new Nunchuck::buttonZ(7,200,128,10)); // Servo pin, max servo value, zero center value, min servo value 
+  nunchuck.addMap(new Nunchuck::buttonC(8,200,128,10)); // Servo pin, max servo value, zero center value, min servo value 
+
   // make the LED pins outputs
   pinMode(leftLed, OUTPUT);
   pinMode(rightLed, OUTPUT);
@@ -30,12 +39,12 @@ void setup() {
 
 void loop() {
   digitalWrite(AUDIOPIN, HIGH);
-  PCJoy_State joyState = myJoy.getState();
-  if (joyState.isConnected){
-    if (joyState.aDown){
-      fire(); 
-    }
+  nunchuck.readData();   // Read inputs and update maps
+
+  if (nunchuck.checkButtonC()){
+    fire(); 
   }
+
 }
 
 void fire() {     
