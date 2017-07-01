@@ -13,10 +13,17 @@
 #define leftServo 0 //pin the left servo is attached
 #define rightLed 3    // pin the right LED is attached to
 #define rightServo 1
+#define headY 14
+#define headX 15
+
 #define AUDIOPIN 3
 
 #define SERVOMIN  150 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
+
+int headXPos = 300;
+int headYPos = 300;
+const int headMove = 5;
 
 Nunchuck nunchuck(SDA, SCL);
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
@@ -45,7 +52,35 @@ void setup() {
 void loop() {
   digitalWrite(AUDIOPIN, HIGH);
   nunchuck.readData();   // Read inputs and update maps
-
+  if (nunchuck.getJoyX() < 125) {
+    Serial.println("move left");
+    if (headXPos > SERVOMIN){
+      headXPos = headXPos - headMove;
+      pwm.setPWM(headX, 0, headXPos);
+    }
+  }
+  if (nunchuck.getJoyX() > 131) {
+    Serial.println("move right");
+    if (headXPos < SERVOMAX){
+      headXPos = headXPos + headMove;
+      pwm.setPWM(headX, 0, headXPos);
+    }
+  }
+  if (nunchuck.getJoyY() < 125) {
+    Serial.println("move Up");
+    if (headYPos > SERVOMIN){
+      headYPos = headYPos - headMove;
+      pwm.setPWM(headY, 0, headYPos);
+    }
+  }
+  if (nunchuck.getJoyY() > 131) {
+    Serial.println("move Down");
+    if (headYPos > SERVOMAX){
+      headYPos = headYPos + headMove;
+      pwm.setPWM(headY, 0, headYPos);
+    }
+  }
+//  Serial.println(pwm.read8(1));
   if (nunchuck.checkButtonC()){
     fire(); 
   }
