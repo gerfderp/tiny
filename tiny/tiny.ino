@@ -9,9 +9,15 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-#define leftLed 4    // pin the left LED is attached to
-#define rightLed 5    // pin the right LED is attached to
+#define leftLed 2    // pin the left LED is attached to
+#define leftServo 0 //pin the left servo is attached
+#define rightLed 3    // pin the right LED is attached to
+#define rightServo 1
 #define AUDIOPIN 3
+
+#define SERVOMIN  150 // this is the 'minimum' pulse length count (out of 4096)
+#define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
+
 Nunchuck nunchuck(SDA, SCL);
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 
@@ -33,15 +39,6 @@ void setup() {
   pinMode(AUDIOPIN, OUTPUT);
   // Set the pin high as the default state
   digitalWrite(AUDIOPIN, HIGH); 
-  
-  // cycle LEDs
-  pwm.setPWM(leftLed, 4096, 0);
-  delay(500);
-  pwm.setPWM(leftLed, 0, 0);
-  
-  pwm.setPWM(rightLed, 0, 0);
-  delay(500);
-  pwm.setPWM(rightLed, 4096, 0);
   Serial.println("Tiny setup finish!");
 }
 
@@ -56,19 +53,42 @@ void loop() {
 }
 
 void fire() {     
-  // change the status LEDs
+  // change the status LEDs           margie poo
+  
   Serial.println("firing started");
+
+  
   pwm.setPWM(leftLed, 4096, 0);
+  
   // bring the pin low to begin the activation
   digitalWrite(AUDIOPIN, LOW); 
-  delay(300);
+  recoil(leftServo);
   pwm.setPWM(leftLed, 0, 0);
 
-  pwm.setPWM(rightLed, 0, 0);
-  delay(200);
   pwm.setPWM(rightLed, 4096, 0);
+  recoil(rightServo);
+  pwm.setPWM(rightLed, 0, 0);
+ 
   // bring the pin high again to end the activation
   digitalWrite(AUDIOPIN, HIGH); 
 
+}
+
+void recoil(int cannon){
+  if (cannon == rightServo){
+    for (uint16_t pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen = pulselen- 10) {
+      pwm.setPWM(cannon, 0, pulselen);
+    }
+    for (uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++) {
+      pwm.setPWM(cannon, 0, pulselen);
+    }
+  } else { 
+    for (uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen = pulselen + 10) {
+      pwm.setPWM(cannon, 0, pulselen);
+    }
+    for (uint16_t pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen--) {
+      pwm.setPWM(cannon, 0, pulselen);
+    }
+  }
 }
 

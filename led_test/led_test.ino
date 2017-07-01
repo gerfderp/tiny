@@ -1,23 +1,24 @@
-const int leftLed = 4;    // pin the left LED is attached to
-const int rightLed = 5;    // pin the right LED is attached to
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
 
+#define leftLed 2    // pin the left LED is attached to
+#define rightLed 3    // pin the right LED is attached to
 
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 void setup() {
-  // put your setup code here, to run once:
- pinMode(leftLed, OUTPUT);
-  pinMode(rightLed, OUTPUT);
-  digitalWrite(leftLed, HIGH);
-  delay(500);
-  digitalWrite(leftLed, LOW);
-  digitalWrite(rightLed, HIGH);
-  delay(500);
-  digitalWrite(rightLed, LOW);
+  pwm.begin();
+  pwm.setPWMFreq(60);  // This is the maximum PWM frequency
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-digitalWrite(leftLed, HIGH);
+pwm.setPWM(leftLed, 4096, 0);
   delay(500);
-  digitalWrite(leftLed, LOW);
+  pwm.setPWM(leftLed, 0, 0);
   delay(500);
+  pwm.setPWM(rightLed, 4096, 0);
+  delay(500);
+  pwm.setPWM(rightLed, 0, 0);
+  delay(500);
+  
 }
