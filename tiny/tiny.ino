@@ -13,7 +13,7 @@
 #define leftServo 0 //pin the left servo is attached
 #define rightLed 3    // pin the right LED is attached to
 #define rightServo 1
-#define headY 14
+#define headY 12
 #define headX 15
 
 #define AUDIOPIN 3
@@ -21,9 +21,12 @@
 #define SERVOMIN  150 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
 
-int headXPos = 300;
+int headXPos = 150;
 int headYPos = 300;
-const int headMove = 5;
+int headXMove = 20;
+int headYMove = 20;
+const int joyDelta = 5;
+const int joyCenter = 128;
 
 Nunchuck nunchuck(SDA, SCL);
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
@@ -46,37 +49,56 @@ void setup() {
   pinMode(AUDIOPIN, OUTPUT);
   // Set the pin high as the default state
   digitalWrite(AUDIOPIN, HIGH); 
+  pwm.setPWM(headY, 0, headYPos);
+  pwm.setPWM(headX, 0, headXPos);
   Serial.println("Tiny setup finish!");
 }
 
 void loop() {
+  
+ 
+  
   digitalWrite(AUDIOPIN, HIGH);
   nunchuck.readData();   // Read inputs and update maps
-  if (nunchuck.getJoyX() < 125) {
+   Serial.print("headXPos:");
+  Serial.print(headXPos);
+  Serial.print("headYPos:");
+  Serial.print(headYPos);
+  Serial.print(" joyY ");
+  Serial.println(nunchuck.getJoyY());
+
+  int joyXDelta = nunchuck.getJoyX() - joyCenter;
+  if ((joyXDelta > 40) || (joyXDelta < 20)){
+    headXMove = 20;
+  } else {
+    headXMove = 5;
+  }
+   
+  if (nunchuck.getJoyX() < (joyCenter - joyDelta)) {
     Serial.println("move left");
     if (headXPos > SERVOMIN){
-      headXPos = headXPos - headMove;
+      headXPos = headXPos - headXMove;
       pwm.setPWM(headX, 0, headXPos);
     }
   }
-  if (nunchuck.getJoyX() > 131) {
+  if (nunchuck.getJoyX() > (joyCenter + joyDelta)) {
     Serial.println("move right");
     if (headXPos < SERVOMAX){
-      headXPos = headXPos + headMove;
+      headXPos = headXPos + headXMove;
       pwm.setPWM(headX, 0, headXPos);
     }
   }
-  if (nunchuck.getJoyY() < 125) {
+  if (nunchuck.getJoyY() < (joyCenter - joyDelta)) {
     Serial.println("move Up");
-    if (headYPos > SERVOMIN){
-      headYPos = headYPos - headMove;
+    if (headYPos < SERVOMAX){
+      headYPos = headYPos + headYMove;
       pwm.setPWM(headY, 0, headYPos);
     }
   }
-  if (nunchuck.getJoyY() > 131) {
+  if (nunchuck.getJoyY() > (joyCenter + joyDelta)) {
     Serial.println("move Down");
-    if (headYPos > SERVOMAX){
-      headYPos = headYPos + headMove;
+    if (headYPos > SERVOMIN){
+      headYPos = headYPos - headYMove;
       pwm.setPWM(headY, 0, headYPos);
     }
   }
