@@ -121,7 +121,7 @@ void fire() {
   digitalWrite(AUDIOPIN, LOW); 
   recoil(leftServo);
   pwm.setPWM(leftLed, 0, 0);
-
+  delay(150);
   pwm.setPWM(rightLed, 4096, 0);
   recoil(rightServo);
   pwm.setPWM(rightLed, 0, 0);
